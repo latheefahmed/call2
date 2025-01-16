@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, send_from_directory, abort
 import pandas as pd
 from twilio.rest import Client
+from flask_cors import CORS 
 import os
 
 app = Flask(__name__)
