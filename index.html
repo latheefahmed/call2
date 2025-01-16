@@ -156,7 +156,7 @@
             மாநில உணவுக் குழும தலைவர் பதவிக்கான அறிவிப்பு. (Announcement for State Food Corporation Chairman Position)</div>
         <button onclick="sendCall()" class="notification-button" aria-label="Send call notifications to eligible citizens">அழைப்பு அறிவிப்பு அனுப்பவும் (Send Call Notification)</button>
         <button onclick="sendMessage()" class="notification-button" aria-label="Send SMS notifications to eligible citizens">SMS அறிவிப்பு அனுப்பவும் (Send SMS Notification)</button>
-        <div id="loading">Loading, please wait...</div>
+        <div id="loading" style="display:none;">Loading, please wait...</div>
         <div id="result"></div>
     </div>
 
@@ -166,64 +166,62 @@
 
     <script>
         function sendCall() {
-    const resultDiv = document.getElementById('result');
-    const loadingDiv = document.getElementById('loading');
-    resultDiv.innerHTML = ''; 
-    loadingDiv.style.display = 'block';
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            resultDiv.innerHTML = ''; 
+            loadingDiv.style.display = 'block';
 
-    fetch('http://127.0.0.1:5000/send-calls', {  // Updated URL to point to your Flask server
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        loadingDiv.style.display = 'none'; 
-        resultDiv.innerHTML = '<h2>Call Notifications</h2>'; 
-        data.forEach(message => {
-            const p = document.createElement('p');
-            p.textContent = message;
-            resultDiv.appendChild(p);
-        });
-    })
-    .catch((error) => {
-        loadingDiv.style.display = 'none'; 
-        resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
-        console.error('Error:', error);
-    });
-}
+            fetch('/send-calls', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingDiv.style.display = 'none'; 
+                resultDiv.innerHTML = '<h2>Call Notifications</h2>'; 
+                data.forEach(message => {
+                    const p = document.createElement('p');
+                    p.textContent = message;
+                    resultDiv.appendChild(p);
+                });
+            })
+            .catch((error) => {
+                loadingDiv.style.display = 'none'; 
+                resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
+                console.error('Error:', error);
+            });
+        }
 
-function sendMessage() {
-    const resultDiv = document.getElementById('result');
-    const loadingDiv = document.getElementById('loading');
-    resultDiv.innerHTML = ''; 
-    loadingDiv.style.display = 'block'; 
+        function sendMessage() {
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            resultDiv.innerHTML = ''; 
+            loadingDiv.style.display = 'block'; 
 
-    fetch('http://127.0.0.1:5000/send-messages', {  // Updated URL to point to your Flask server
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        loadingDiv.style.display = 'none'; 
-        resultDiv.innerHTML = '<h2>SMS Notifications</h2>'; 
-        data.forEach(message => {
-            const p = document.createElement('p');
-            p.textContent = message;
-            resultDiv.appendChild(p);
-        });
-    })
-    .catch((error) => {
-        loadingDiv.style.display = 'none'; 
-        resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
-        console.error('Error:', error);
-    });
-}
-
+            fetch('/send-messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingDiv.style.display = 'none'; 
+                resultDiv.innerHTML = '<h2>SMS Notifications</h2>'; 
+                data.forEach(message => {
+                    const p = document.createElement('p');
+                    p.textContent = message;
+                    resultDiv.appendChild(p);
+                });
+            })
+            .catch((error) => {
+                loadingDiv.style.display = 'none'; 
+                resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
+                console.error('Error:', error);
+            });
+        }
     </script>
-
 </body>
 </html>
