@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>பொது விநியோகத் திடம்</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header img {
+            height: 50px;
+        }
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+        nav {
+            background-color: #006400;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+        .card {
+            background-color: white;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #006400;
+        }
+        .footer {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .button {
+            background-color: #ff4500;
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            border: none;
+            border-radius: 3px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .button:hover {
+            background-color: #cc3700;
+        }
+        .notification {
+            background-color: #ffdd57;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+        .notification-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px;
+        }
+        .notification-button {
+            background-color: #ffdd57;
+            color: #333;
+            padding: 10px 15px;
+            text-align: center;
+            border: none;
+            border-radius: 3px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .notification-button:hover {
+            background-color: #e6c34a;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <span>பொது விநியோகத் திடம்</span>
+        </div>
+        <div>
+            <a href="#">முகப்பு</a>
+            <a href="#">தொடர்பு</a>
+            <a href="#">English</a>
+        </div>
+    </header>
+
+    <nav>
+        <div>பொது விநியோகத் திடல் சேவைகள்</div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h3>பயனாளர் தகவல்</h3>
+            <p>பயனாளர் தொடர்பான அனைத்து தகவல்களையும் பெறலாம்.</p>
+            <a href="#" class="button">மேலும் காண</a>
+        </div>
+        <div class="card">
+            <h3>தொகுப்பு விபரங்கள்</h3>
+            <p>தொகுப்புகளின் நிலை மற்றும் விபரங்களை காண.</p>
+            <a href="#" class="button">மேலும் காண</a>
+        </div>
+        <div class="card">
+            <h3>அறிக்கைகள்</h3>
+            <p>முழு விபரங்களுடன் அறிக்கைகளைப் பெற.</p>
+            <a href="#" class="button">மேலும் காண</a>
+        </div>
+        <div class="card">
+            <h3>உதவி மையம்</h3>
+            <p>எங்கள் தொலைபேசி எண் அல்லது மின்னஞ்சல் மூலம் உதவி பெற.</p>
+            <a href="#" class="button">தொடர்பு கொள்ள</a>
+        </div>
+        <div class="card">
+            <h3>அறிவிப்புகள்</h3>
+            <p>புதிய அறிவிப்புகள் மற்றும் தகவல்களைப் பெற.</p>
+            <a href="#" class="button">மேலும் காண</a>
+        </div>
+        <div class="card">
+            <h3>புகார் பதிவு</h3>
+            <p>சேவைகள் தொடர்பான புகார்களை இங்கு பதிவு செய்யலாம்.</p>
+            <a href="#" class="button">புகார் செய்ய</a>
+        </div>
+    </div>
+
+    <div class="notification-container">
+        <div class="notification">
+            மாநில உணவுக் குழும தலைவர் பதவிக்கான அறிவிப்பு. (Announcement for State Food Corporation Chairman Position)</div>
+        <button onclick="sendCall()" class="notification-button" aria-label="Send call notifications to eligible citizens">அழைப்பு அறிவிப்பு அனுப்பவும் (Send Call Notification)</button>
+        <button onclick="sendMessage()" class="notification-button" aria-label="Send SMS notifications to eligible citizens">SMS அறிவிப்பு அனுப்பவும் (Send SMS Notification)</button>
+        <div id="loading">Loading, please wait...</div>
+        <div id="result"></div>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 பொது விநியோகத் திடம். அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.</p>
+    </div>
+
+    <script>
+        function sendCall() {
+    const resultDiv = document.getElementById('result');
+    const loadingDiv = document.getElementById('loading');
+    resultDiv.innerHTML = ''; 
+    loadingDiv.style.display = 'block';
+
+    fetch('http://127.0.0.1:5000/send-calls', {  // Updated URL to point to your Flask server
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingDiv.style.display = 'none'; 
+        resultDiv.innerHTML = '<h2>Call Notifications</h2>'; 
+        data.forEach(message => {
+            const p = document.createElement('p');
+            p.textContent = message;
+            resultDiv.appendChild(p);
+        });
+    })
+    .catch((error) => {
+        loadingDiv.style.display = 'none'; 
+        resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
+        console.error('Error:', error);
+    });
+}
+
+function sendMessage() {
+    const resultDiv = document.getElementById('result');
+    const loadingDiv = document.getElementById('loading');
+    resultDiv.innerHTML = ''; 
+    loadingDiv.style.display = 'block'; 
+
+    fetch('http://127.0.0.1:5000/send-messages', {  // Updated URL to point to your Flask server
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingDiv.style.display = 'none'; 
+        resultDiv.innerHTML = '<h2>SMS Notifications</h2>'; 
+        data.forEach(message => {
+            const p = document.createElement('p');
+            p.textContent = message;
+            resultDiv.appendChild(p);
+        });
+    })
+    .catch((error) => {
+        loadingDiv.style.display = 'none'; 
+        resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
+        console.error('Error:', error);
+    });
+}
+
+    </script>
+
+</body>
+</html>
