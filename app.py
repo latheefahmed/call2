@@ -1,11 +1,11 @@
 from flask import Flask, jsonify, send_from_directory, abort
 import pandas as pd
 from twilio.rest import Client
-from flask_cors import CORS 
+
 import os
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+
 
 account_sid = os.getenv('account_sid')
 auth_token = os.getenv('auth_token')
