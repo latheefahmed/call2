@@ -7,10 +7,10 @@ from flask_cors import CORS  # Import CORS to handle cross-origin requests
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-account_sid = 'AC31bda039d228b37bd8736086e5b35d25'
-auth_token = 'ee6caf6737325a54b0c8f7f61aee0583'
+account_sid = os.getenv('account_sid')
+auth_token = os.getenv('auth_token')
 twilio_phone_number = '+16812532416'
-twilio_bin_url = 'https://handler.twilio.com/twiml/EHb5dfd4fcd5ffbff25198e75f83efbbef'
+twilio_bin_url = os.getenv('twilio_bin_url')
 client = Client(account_sid, auth_token)
 
 data_path = 'Statement8_Dataset.csv'
