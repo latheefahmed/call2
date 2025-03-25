@@ -19,9 +19,6 @@
             justify-content: space-between;
             align-items: center;
         }
-        header img {
-            height: 50px;
-        }
         header a {
             color: white;
             text-decoration: none;
@@ -45,7 +42,7 @@
             padding: 15px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .card h3 {
             margin-top: 0;
@@ -58,18 +55,18 @@
             text-align: center;
             margin-top: 20px;
         }
-        .button {
+        .button, .notification-button {
             background-color: #ff4500;
             color: white;
             padding: 10px 15px;
-            text-align: center;
             border: none;
             border-radius: 3px;
             text-decoration: none;
             display: inline-block;
             margin-top: 10px;
+            cursor: pointer;
         }
-        .button:hover {
+        .button:hover, .notification-button:hover {
             background-color: #cc3700;
         }
         .notification {
@@ -85,20 +82,6 @@
             flex-direction: column;
             gap: 10px;
             margin: 20px;
-        }
-        .notification-button {
-            background-color: #ffdd57;
-            color: #333;
-            padding: 10px 15px;
-            text-align: center;
-            border: none;
-            border-radius: 3px;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 10px;
-        }
-        .notification-button:hover {
-            background-color: #e6c34a;
         }
     </style>
 </head>
@@ -119,6 +102,7 @@
     </nav>
 
     <div class="container">
+        <!-- Example cards -->
         <div class="card">
             <h3>பயனாளர் தகவல்</h3>
             <p>பயனாளர் தொடர்பான அனைத்து தகவல்களையும் பெறலாம்.</p>
@@ -134,34 +118,19 @@
             <p>முழு விபரங்களுடன் அறிக்கைகளைப் பெற.</p>
             <a href="#" class="button">மேலும் காண</a>
         </div>
-        <div class="card">
-            <h3>உதவி மையம்</h3>
-            <p>எங்கள் தொலைபேசி எண் அல்லது மின்னஞ்சல் மூலம் உதவி பெற.</p>
-            <a href="#" class="button">தொடர்பு கொள்ள</a>
-        </div>
-        <div class="card">
-            <h3>அறிவிப்புகள்</h3>
-            <p>புதிய அறிவிப்புகள் மற்றும் தகவல்களைப் பெற.</p>
-            <a href="#" class="button">மேலும் காண</a>
-        </div>
-        <div class="card">
-            <h3>புகார் பதிவு</h3>
-            <p>சேவைகள் தொடர்பான புகார்களை இங்கு பதிவு செய்யலாம்.</p>
-            <a href="#" class="button">புகார் செய்ய</a>
-        </div>
     </div>
 
     <div class="notification-container">
         <div class="notification">
-            மாநில உணவுக் குழுமத்தின் தலைவர் பதவிக்கான அறிவிப்பு (Announcement for State Food Corporation Chairman Position)
+            மாநில உணவுக் குழுமத்தின் தலைவர் பதவிக்கான அறிவிப்பு<br>(Announcement for State Food Corporation Chairman Position)
         </div>
-        <button onclick="sendCall()" class="notification-button" aria-label="Send call notifications to eligible citizens">
+        <button onclick="sendCall()" class="notification-button" aria-label="Send call notifications">
             அழைப்பு அறிவிப்பு அனுப்பவும் (Send Call Notification)
         </button>
-        <button onclick="sendMessage()" class="notification-button" aria-label="Send SMS notifications to eligible citizens">
+        <button onclick="sendMessage()" class="notification-button" aria-label="Send SMS notifications">
             SMS அறிவிப்பு அனுப்பவும் (Send SMS Notification)
         </button>
-        <button onclick="sendWhatsApp()" class="notification-button" aria-label="Send WhatsApp notifications to eligible citizens">
+        <button onclick="sendWhatsApp()" class="notification-button" aria-label="Send WhatsApp notifications">
             WhatsApp அறிவிப்பு அனுப்பவும் (Send WhatsApp Notification)
         </button>
         <div id="loading" style="display:none;">Loading, please wait...</div>
@@ -173,91 +142,38 @@
     </div>
 
     <script>
+        function handleResponse(endpoint, title) {
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            resultDiv.innerHTML = ''; 
+            loadingDiv.style.display = 'block'; 
+
+            fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+            .then(response => response.json())
+            .then(data => {
+                loadingDiv.style.display = 'none';
+                resultDiv.innerHTML = `<h2>${title}</h2>`;
+                data.forEach(message => {
+                    const p = document.createElement('p');
+                    p.textContent = message;
+                    resultDiv.appendChild(p);
+                });
+            })
+            .catch(error => {
+                loadingDiv.style.display = 'none';
+                resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
+                console.error('Error:', error);
+            });
+        }
+
         function sendCall() {
-            const resultDiv = document.getElementById('result');
-            const loadingDiv = document.getElementById('loading');
-            resultDiv.innerHTML = ''; 
-            loadingDiv.style.display = 'block';
-
-            fetch('/send-calls', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                loadingDiv.style.display = 'none'; 
-                resultDiv.innerHTML = '<h2>Call Notifications</h2>'; 
-                data.forEach(message => {
-                    const p = document.createElement('p');
-                    p.textContent = message;
-                    resultDiv.appendChild(p);
-                });
-            })
-            .catch((error) => {
-                loadingDiv.style.display = 'none'; 
-                resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
-                console.error('Error:', error);
-            });
+            handleResponse('/send-calls', 'Call Notifications');
         }
-
         function sendMessage() {
-            const resultDiv = document.getElementById('result');
-            const loadingDiv = document.getElementById('loading');
-            resultDiv.innerHTML = ''; 
-            loadingDiv.style.display = 'block'; 
-
-            fetch('/send-messages', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                loadingDiv.style.display = 'none'; 
-                resultDiv.innerHTML = '<h2>SMS Notifications</h2>'; 
-                data.forEach(message => {
-                    const p = document.createElement('p');
-                    p.textContent = message;
-                    resultDiv.appendChild(p);
-                });
-            })
-            .catch((error) => {
-                loadingDiv.style.display = 'none'; 
-                resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
-                console.error('Error:', error);
-            });
+            handleResponse('/send-messages', 'SMS Notifications');
         }
-
         function sendWhatsApp() {
-            const resultDiv = document.getElementById('result');
-            const loadingDiv = document.getElementById('loading');
-            resultDiv.innerHTML = ''; 
-            loadingDiv.style.display = 'block'; 
-
-            fetch('/send-whatsapp', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                loadingDiv.style.display = 'none'; 
-                resultDiv.innerHTML = '<h2>WhatsApp Notifications</h2>'; 
-                data.forEach(message => {
-                    const p = document.createElement('p');
-                    p.textContent = message;
-                    resultDiv.appendChild(p);
-                });
-            })
-            .catch((error) => {
-                loadingDiv.style.display = 'none'; 
-                resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
-                console.error('Error:', error);
-            });
+            handleResponse('/send-whatsapp', 'WhatsApp Notifications');
         }
     </script>
 </body>
