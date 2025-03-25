@@ -153,9 +153,17 @@
 
     <div class="notification-container">
         <div class="notification">
-            மாநில உணவுக் குழுமத்தின் தலைவர் பதவிக்கான அறிவிப்பு (Announcement for State Food Corporation Chairman Position)</div>
-        <button onclick="sendCall()" class="notification-button" aria-label="Send call notifications to eligible citizens">அழைப்பு அறிவிப்பு அனுப்பவும் (Send Call Notification)</button>
-        <button onclick="sendMessage()" class="notification-button" aria-label="Send SMS notifications to eligible citizens">SMS அறிவிப்பு அனுப்பவும் (Send SMS Notification)</button>
+            மாநில உணவுக் குழுமத்தின் தலைவர் பதவிக்கான அறிவிப்பு (Announcement for State Food Corporation Chairman Position)
+        </div>
+        <button onclick="sendCall()" class="notification-button" aria-label="Send call notifications to eligible citizens">
+            அழைப்பு அறிவிப்பு அனுப்பவும் (Send Call Notification)
+        </button>
+        <button onclick="sendMessage()" class="notification-button" aria-label="Send SMS notifications to eligible citizens">
+            SMS அறிவிப்பு அனுப்பவும் (Send SMS Notification)
+        </button>
+        <button onclick="sendWhatsApp()" class="notification-button" aria-label="Send WhatsApp notifications to eligible citizens">
+            WhatsApp அறிவிப்பு அனுப்பவும் (Send WhatsApp Notification)
+        </button>
         <div id="loading" style="display:none;">Loading, please wait...</div>
         <div id="result"></div>
     </div>
@@ -210,6 +218,35 @@
             .then(data => {
                 loadingDiv.style.display = 'none'; 
                 resultDiv.innerHTML = '<h2>SMS Notifications</h2>'; 
+                data.forEach(message => {
+                    const p = document.createElement('p');
+                    p.textContent = message;
+                    resultDiv.appendChild(p);
+                });
+            })
+            .catch((error) => {
+                loadingDiv.style.display = 'none'; 
+                resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
+                console.error('Error:', error);
+            });
+        }
+
+        function sendWhatsApp() {
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            resultDiv.innerHTML = ''; 
+            loadingDiv.style.display = 'block'; 
+
+            fetch('/send-whatsapp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingDiv.style.display = 'none'; 
+                resultDiv.innerHTML = '<h2>WhatsApp Notifications</h2>'; 
                 data.forEach(message => {
                     const p = document.createElement('p');
                     p.textContent = message;
