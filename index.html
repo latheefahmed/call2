@@ -162,7 +162,6 @@
         <button onclick="sendMessage()" class="notification-button" aria-label="Send SMS notifications to eligible citizens">
             SMS அறிவிப்பு அனுப்பவும் (Send SMS Notification)
         </button>
-        <!-- Added WhatsApp button -->
         <button onclick="sendWhatsApp()" class="notification-button" aria-label="Send WhatsApp notifications to eligible citizens">
             WhatsApp அறிவிப்பு அனுப்பவும் (Send WhatsApp Notification)
         </button>
@@ -185,18 +184,28 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
             })
-            .then(response => response.json())
+            .then(response => {
+                loadingDiv.style.display = 'none';
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                }
+                return response.text();
+            })
+            .then(text => {
+                if (!text) {
+                    throw new Error("Empty response from server");
+                }
+                return JSON.parse(text);
+            })
             .then(data => {
-                loadingDiv.style.display = 'none'; 
-                resultDiv.innerHTML = '<h2>Call Notifications</h2>'; 
+                resultDiv.innerHTML = '<h2>Call Notifications</h2>';
                 data.forEach(message => {
                     const p = document.createElement('p');
                     p.textContent = message;
                     resultDiv.appendChild(p);
                 });
             })
-            .catch((error) => {
-                loadingDiv.style.display = 'none'; 
+            .catch(error => {
                 resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
                 console.error('Error:', error);
             });
@@ -206,24 +215,34 @@
             const resultDiv = document.getElementById('result');
             const loadingDiv = document.getElementById('loading');
             resultDiv.innerHTML = ''; 
-            loadingDiv.style.display = 'block'; 
+            loadingDiv.style.display = 'block';
 
             fetch('/send-messages', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
             })
-            .then(response => response.json())
+            .then(response => {
+                loadingDiv.style.display = 'none';
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                }
+                return response.text();
+            })
+            .then(text => {
+                if (!text) {
+                    throw new Error("Empty response from server");
+                }
+                return JSON.parse(text);
+            })
             .then(data => {
-                loadingDiv.style.display = 'none'; 
-                resultDiv.innerHTML = '<h2>SMS Notifications</h2>'; 
+                resultDiv.innerHTML = '<h2>SMS Notifications</h2>';
                 data.forEach(message => {
                     const p = document.createElement('p');
                     p.textContent = message;
                     resultDiv.appendChild(p);
                 });
             })
-            .catch((error) => {
-                loadingDiv.style.display = 'none'; 
+            .catch(error => {
                 resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
                 console.error('Error:', error);
             });
@@ -239,9 +258,20 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
             })
-            .then(response => response.json())
-            .then(data => {
+            .then(response => {
                 loadingDiv.style.display = 'none';
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                }
+                return response.text();
+            })
+            .then(text => {
+                if (!text) {
+                    throw new Error("Empty response from server");
+                }
+                return JSON.parse(text);
+            })
+            .then(data => {
                 resultDiv.innerHTML = '<h2>WhatsApp Notifications</h2>';
                 data.forEach(message => {
                     const p = document.createElement('p');
@@ -249,8 +279,7 @@
                     resultDiv.appendChild(p);
                 });
             })
-            .catch((error) => {
-                loadingDiv.style.display = 'none';
+            .catch(error => {
                 resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
                 console.error('Error:', error);
             });
