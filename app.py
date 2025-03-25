@@ -7,14 +7,23 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# Twilio configuration (ensure these are set as environment variables)
+# Twilio configuration
+# Environment variables can override these defaults if set.
 account_sid = os.getenv('account_sid')
 auth_token = os.getenv('auth_token')
-twilio_phone_number = os.getenv('twilio_phone_number', '+16812532416')  # WhatsApp-enabled number should be set here
+
+# Use a dedicated number for SMS/Calls (must be a valid Twilio number enabled for these channels)
+twilio_call_sms_number = os.getenv('twilio_call_sms_number', '+16812532416')
+
+# Use the WhatsApp Sandbox number (with the whatsapp: prefix)
+twilio_whatsapp_number = 'whatsapp:+14155238886'
+
+# URL for Twilio to fetch TwiML instructions for calls
 twilio_bin_url = os.getenv('twilio_bin_url')
+
 client = Client(account_sid, auth_token)
 
-# Load CSV data
+# Load CSV data (ensure the file exists with the proper columns)
 data_path = 'Statement8_Dataset.csv'
 data = None
 if os.path.exists(data_path):
@@ -34,7 +43,7 @@ def index():
         abort(404, description="Index file not found.")
 
 @app.route('/send-calls', methods=['POST'])
-def send_calls_to_male_heads():
+def send_calls():
     if data is None:
         return jsonify(["Data not loaded. Check CSV path."])
     
@@ -43,12 +52,12 @@ def send_calls_to_male_heads():
     for ration_card_number, group in grouped_data:
         cardholder_row = group[group['RelationToCardHolder'] == 'Self']
         if not cardholder_row.empty:
-            cardholder_gender = cardholder_row['Gender'].values[0].strip().lower()
-            number_of_family_members = cardholder_row['NumberOfFamilyMembers'].values[0]
-            phone_number = cardholder_row['PhoneNumber'].values[0]
+            gender = cardholder_row['Gender'].values[0].strip().lower()
+            num_family = cardholder_row['NumberOfFamilyMembers'].values[0]
+            phone = cardholder_row['PhoneNumber'].values[0]
             head_name = cardholder_row['MemberName'].values[0]
 
-            if cardholder_gender == 'male' and number_of_family_members > 1:
+            if gender == 'male' and num_family > 1:
                 has_spouse = not group[
                     (group['RelationToCardHolder'] == 'Spouse') &
                     (group['Gender'].str.lower() == 'female')
@@ -56,23 +65,23 @@ def send_calls_to_male_heads():
                 if has_spouse:
                     try:
                         call = client.calls.create(
-                            to=phone_number,
-                            from_=twilio_phone_number,
+                            to=phone,
+                            from_=twilio_call_sms_number,
                             url=twilio_bin_url
                         )
-                        results.append(f"Call initiated to {head_name} at {phone_number}")
+                        results.append(f"Call initiated to {head_name} at {phone}")
                     except Exception as e:
-                        results.append(f"Failed to call {head_name} at {phone_number}: {str(e)}")
+                        results.append(f"Failed to call {head_name} at {phone}: {str(e)}")
                 else:
                     results.append(f"No call made to {head_name} (no spouse available).")
-            elif cardholder_gender == 'male' and number_of_family_members == 1:
+            elif gender == 'male' and num_family == 1:
                 results.append(f"No call made to {head_name} (only 1 family member).")
             else:
                 results.append(f"No action needed for {head_name} (already updated).")
     return jsonify(results)
 
 @app.route('/send-messages', methods=['POST'])
-def send_messages_to_update_spouse_name():
+def send_messages():
     if data is None:
         return jsonify(["Data not loaded. Check CSV path."])
     
@@ -81,12 +90,12 @@ def send_messages_to_update_spouse_name():
     for ration_card_number, group in grouped_data:
         cardholder_row = group[group['RelationToCardHolder'] == 'Self']
         if not cardholder_row.empty:
-            cardholder_gender = cardholder_row['Gender'].values[0].strip().lower()
-            number_of_family_members = cardholder_row['NumberOfFamilyMembers'].values[0]
-            phone_number = cardholder_row['PhoneNumber'].values[0]
+            gender = cardholder_row['Gender'].values[0].strip().lower()
+            num_family = cardholder_row['NumberOfFamilyMembers'].values[0]
+            phone = cardholder_row['PhoneNumber'].values[0]
             head_name = cardholder_row['MemberName'].values[0]
 
-            if cardholder_gender == 'male' and number_of_family_members > 1:
+            if gender == 'male' and num_family > 1:
                 has_spouse = not group[
                     (group['RelationToCardHolder'] == 'Spouse') &
                     (group['Gender'].str.lower() == 'female')
@@ -94,23 +103,23 @@ def send_messages_to_update_spouse_name():
                 if has_spouse:
                     try:
                         message = client.messages.create(
-                            to=phone_number,
-                            from_=twilio_phone_number,
-                            body=f"Hello {head_name}, please update the head of your household to your spouse. Visit the portal: https://tnpds.gov.in/"
+                            to=phone,
+                            from_=twilio_call_sms_number,
+                            body=f"Hello {head_name}, please update your household head to your spouse. Visit: https://tnpds.gov.in/"
                         )
-                        results.append(f"Message sent to {head_name} at {phone_number}")
+                        results.append(f"SMS sent to {head_name} at {phone}")
                     except Exception as e:
-                        results.append(f"Failed to send message to {head_name} at {phone_number}: {str(e)}")
+                        results.append(f"Failed to send SMS to {head_name} at {phone}: {str(e)}")
                 else:
-                    results.append(f"No message sent to {head_name} (no spouse available).")
-            elif cardholder_gender == 'male' and number_of_family_members == 1:
-                results.append(f"No message sent to {head_name} (only 1 family member).")
+                    results.append(f"No SMS sent to {head_name} (no spouse available).")
+            elif gender == 'male' and num_family == 1:
+                results.append(f"No SMS sent to {head_name} (only 1 family member).")
             else:
                 results.append(f"No action needed for {head_name} (already updated).")
     return jsonify(results)
 
 @app.route('/send-whatsapp', methods=['POST'])
-def send_whatsapp_notifications():
+def send_whatsapp():
     if data is None:
         return jsonify(["Data not loaded. Check CSV path."])
     
@@ -119,12 +128,12 @@ def send_whatsapp_notifications():
     for ration_card_number, group in grouped_data:
         cardholder_row = group[group['RelationToCardHolder'] == 'Self']
         if not cardholder_row.empty:
-            cardholder_gender = cardholder_row['Gender'].values[0].strip().lower()
-            number_of_family_members = cardholder_row['NumberOfFamilyMembers'].values[0]
-            phone_number = cardholder_row['PhoneNumber'].values[0]
+            gender = cardholder_row['Gender'].values[0].strip().lower()
+            num_family = cardholder_row['NumberOfFamilyMembers'].values[0]
+            phone = cardholder_row['PhoneNumber'].values[0]
             head_name = cardholder_row['MemberName'].values[0]
 
-            if cardholder_gender == 'male' and number_of_family_members > 1:
+            if gender == 'male' and num_family > 1:
                 has_spouse = not group[
                     (group['RelationToCardHolder'] == 'Spouse') &
                     (group['Gender'].str.lower() == 'female')
@@ -132,16 +141,16 @@ def send_whatsapp_notifications():
                 if has_spouse:
                     try:
                         message = client.messages.create(
-                            to=f'whatsapp:{phone_number}',
-                            from_=f'whatsapp:{twilio_phone_number}',
+                            to=f'whatsapp:{phone}',
+                            from_=twilio_whatsapp_number,
                             body=f"Hello {head_name}, please update your household head to your spouse. Visit: https://tnpds.gov.in/"
                         )
-                        results.append(f"WhatsApp message sent to {head_name} at {phone_number}")
+                        results.append(f"WhatsApp message sent to {head_name} at {phone}")
                     except Exception as e:
-                        results.append(f"Failed to send WhatsApp message to {head_name} at {phone_number}: {str(e)}")
+                        results.append(f"Failed to send WhatsApp message to {head_name} at {phone}: {str(e)}")
                 else:
                     results.append(f"No WhatsApp message sent to {head_name} (no spouse available).")
-            elif cardholder_gender == 'male' and number_of_family_members == 1:
+            elif gender == 'male' and num_family == 1:
                 results.append(f"No WhatsApp message sent to {head_name} (only 1 family member).")
             else:
                 results.append(f"No action needed for {head_name} (already updated).")
